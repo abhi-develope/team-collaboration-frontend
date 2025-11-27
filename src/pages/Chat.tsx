@@ -17,29 +17,13 @@ export default function Chat() {
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (user?.teamId) {
-      fetchMessages();
-      socketService.joinTeam(user.teamId);
-      socketService.onMessage(handleNewMessage);
-    }
-
-    return () => {
-      socketService.offMessage();
-    };
-  }, [user?.teamId]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const fetchMessages = async () => {
     if (!user?.teamId) return;
 
     try {
       const response = await messageAPI.getAll(user.teamId);
       setMessages(response.data?.messages || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch messages");
     }
   };
@@ -55,7 +39,7 @@ export default function Chat() {
     try {
       await messageAPI.send(newMessage, user.teamId);
       setNewMessage("");
-    } catch (error) {
+    } catch {
       toast.error("Failed to send message");
     }
   };
@@ -63,6 +47,22 @@ export default function Chat() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    if (user?.teamId) {
+      fetchMessages();
+      socketService.joinTeam(user.teamId);
+      socketService.onMessage(handleNewMessage);
+    }
+
+    return () => {
+      socketService.offMessage();
+    };
+  }, [user?.teamId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
     <div className="space-y-6">

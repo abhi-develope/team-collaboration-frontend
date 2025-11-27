@@ -22,7 +22,7 @@ api.interceptors.request.use((config) => {
 // Handle errors
 api.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<ApiResponse<any>>) => {
+  (error: AxiosError<ApiResponse<unknown>>) => {
     const message = error.response?.data?.message || "An error occurred";
     return Promise.reject(new Error(message));
   }

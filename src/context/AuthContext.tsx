@@ -4,8 +4,8 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  User as FirebaseUser,
 } from "firebase/auth";
+import type { User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/services/firebase";
 import { authAPI } from "@/services/api";
 import socketService from "@/services/socket";
@@ -54,23 +54,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      // Sign in with Firebase
       await signInWithEmailAndPassword(auth, email, password);
-
-      // Login to backend
       const response = await authAPI.login(email, password);
-
-      // Store token
       localStorage.setItem("token", response.data.token);
       setToken(response.data.token);
       setUser(response.data.user);
-
-      // Connect to socket
       socketService.connect(response.data.token);
-
       toast.success("Login successful!");
-    } catch (error: any) {
-      toast.error(error.message || "Login failed");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : undefined;
+      toast.error(message || "Login failed");
       throw error;
     }
   };
@@ -82,23 +75,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     role?: Role
   ) => {
     try {
-      // Create Firebase user
       await createUserWithEmailAndPassword(auth, email, password);
-
-      // Register in backend
       const response = await authAPI.register(email, password, name, role);
-
-      // Store token
       localStorage.setItem("token", response.data.token);
       setToken(response.data.token);
       setUser(response.data.user);
-
-      // Connect to socket
       socketService.connect(response.data.token);
-
       toast.success("Registration successful!");
-    } catch (error: any) {
-      toast.error(error.message || "Registration failed");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : undefined;
+      toast.error(message || "Registration failed");
       throw error;
     }
   };
@@ -111,8 +97,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null);
       socketService.disconnect();
       toast.success("Logged out successfully");
-    } catch (error: any) {
-      toast.error(error.message || "Logout failed");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : undefined;
+      toast.error(message || "Logout failed");
       throw error;
     }
   };

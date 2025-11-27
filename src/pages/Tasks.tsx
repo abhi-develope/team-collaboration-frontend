@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import type { DropResult } from "@hello-pangea/dnd";
 import { taskAPI, projectAPI } from "@/services/api";
-import { Task, TaskStatus, Project, Role } from "@/types";
+import type { Task, Project } from "@/types";
+import { TaskStatus } from "@/types";
 import { useAuth } from "@/context/AuthContext";
+import socketService from "@/services/socket";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +58,24 @@ export default function Tasks() {
     }
   }, [selectedProject]);
 
+  useEffect(() => {
+    if (user?.teamId) {
+      socketService.joinTeam(user.teamId);
+      socketService.onTaskUpdate((updated) => {
+        setTasks((prev) => {
+          const exists = prev.find((t) => t._id === updated._id);
+          if (exists) {
+            return prev.map((t) => (t._id === updated._id ? updated : t));
+          }
+          return [...prev, updated];
+        });
+      });
+    }
+    return () => {
+      socketService.offTaskUpdate();
+    };
+  }, [user?.teamId]);
+
   const fetchProjects = async () => {
     try {
       const response = await projectAPI.getAll(user?.teamId || undefined);
@@ -67,7 +83,7 @@ export default function Tasks() {
       if (response.data?.projects?.length > 0) {
         setSelectedProject(response.data.projects[0]._id);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch projects");
     }
   };
@@ -77,7 +93,7 @@ export default function Tasks() {
     try {
       const response = await taskAPI.getAll(selectedProject);
       setTasks(response.data?.tasks || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch tasks");
     } finally {
       setLoading(false);
@@ -98,7 +114,7 @@ export default function Tasks() {
         )
       );
       toast.success("Task updated successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to update task");
     }
   };
@@ -119,7 +135,7 @@ export default function Tasks() {
         status: TaskStatus.TODO,
       });
       toast.success("Task created successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to create task");
     }
   };
@@ -131,7 +147,7 @@ export default function Tasks() {
       await taskAPI.delete(taskId);
       setTasks(tasks.filter((task) => task._id !== taskId));
       toast.success("Task deleted successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete task");
     }
   };

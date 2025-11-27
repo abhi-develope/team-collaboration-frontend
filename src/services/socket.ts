@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import type { Message, Task } from "@/types";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
@@ -51,13 +52,13 @@ class SocketService {
     }
   }
 
-  onMessage(callback: (data: any) => void) {
+  onMessage(callback: (data: Message) => void) {
     if (this.socket) {
       this.socket.on("new-message", callback);
     }
   }
 
-  onTaskUpdate(callback: (data: any) => void) {
+  onTaskUpdate(callback: (data: Task) => void) {
     if (this.socket) {
       this.socket.on("task-updated", callback);
     }
