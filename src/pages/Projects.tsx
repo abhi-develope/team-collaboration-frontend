@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { formatDate } from "@/lib/utils";
 
@@ -43,7 +43,7 @@ export default function Projects() {
     try {
       const response = await projectAPI.getAll(user?.teamId || undefined);
       setProjects(response.data?.projects || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch projects");
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export default function Projects() {
       setIsDialogOpen(false);
       setNewProject({ name: "", description: "" });
       toast.success("Project created successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to create project");
     }
   };
@@ -78,7 +78,7 @@ export default function Projects() {
       await projectAPI.delete(id);
       setProjects(projects.filter((p) => p._id !== id));
       toast.success("Project deleted successfully");
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete project");
     }
   };

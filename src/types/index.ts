@@ -1,6 +1,18 @@
-export type Role = "ADMIN" | "MANAGER" | "MEMBER";
+export const Role = {
+  ADMIN: "ADMIN",
+  MANAGER: "MANAGER",
+  MEMBER: "MEMBER",
+} as const;
 
-export type TaskStatus = "todo" | "in-progress" | "done";
+export type Role = (typeof Role)[keyof typeof Role];
+
+export const TaskStatus = {
+  TODO: "todo",
+  IN_PROGRESS: "in-progress",
+  DONE: "done",
+} as const;
+
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
 
 export interface User {
   id: string;

@@ -13,10 +13,6 @@ export default function Dashboard() {
     completed: 0,
   });
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
   const fetchStats = async () => {
     try {
       const [projectsRes, tasksRes] = await Promise.all([
@@ -31,10 +27,14 @@ export default function Dashboard() {
         inProgress: tasks.filter((t) => t.status === "in-progress").length,
         completed: tasks.filter((t) => t.status === "done").length,
       });
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
+    } catch {
+      console.error("Failed to fetch stats");
     }
   };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   return (
     <div className="space-y-6">
