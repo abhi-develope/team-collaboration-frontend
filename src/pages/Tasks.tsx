@@ -5,6 +5,7 @@ import { taskAPI, projectAPI } from "@/services/api";
 import type { Task, Project } from "@/types";
 import { TaskStatus } from "@/types";
 import { useAuth } from "@/context/AuthContext";
+import socketService from "@/services/socket";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,24 @@ export default function Tasks() {
       fetchTasks();
     }
   }, [selectedProject]);
+
+  useEffect(() => {
+    if (user?.teamId) {
+      socketService.joinTeam(user.teamId);
+      socketService.onTaskUpdate((updated) => {
+        setTasks((prev) => {
+          const exists = prev.find((t) => t._id === updated._id);
+          if (exists) {
+            return prev.map((t) => (t._id === updated._id ? updated : t));
+          }
+          return [...prev, updated];
+        });
+      });
+    }
+    return () => {
+      socketService.offTaskUpdate();
+    };
+  }, [user?.teamId]);
 
   const fetchProjects = async () => {
     try {
